@@ -1,0 +1,15 @@
+# 忽略构建目录
+build/
+build-*/
+*.user
+*.user.*
+
+# 忽略 IDE 设置
+.vscode/
+.idea/
+
+# 忽略 CMake 生成文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
