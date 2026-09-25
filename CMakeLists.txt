@@ -30,3 +30,12 @@ qt_generate_deploy_app_script(
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
 install(SCRIPT ${deploy_script})
+# ==========================================
+# 自动将 assets 文件夹拷贝到构建输出目录
+# ==========================================
+add_custom_command(TARGET DesktopPet POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/assets"
+    "$<TARGET_FILE_DIR:DesktopPet>/assets"
+    COMMENT "Copying assets to build directory..."
+)
