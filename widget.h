@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QMenu>
+#include <QMovie>   // 新增：播放动画需要的库
 
 class Widget : public QWidget
 {
@@ -15,15 +16,14 @@ public:
     ~Widget();
 
 protected:
-    // 鼠标事件重写
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
-    // 右键菜单事件重写
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
-    QLabel *petLabel;       // 显示桌宠图片的标签
-    QPoint dragPosition;    // 记录拖拽时的鼠标偏移量
+    QLabel *petLabel;
+    QMovie *petMovie;   // 新增：动画指针
+    QPoint dragPosition;
 };
 
 #endif // WIDGET_H
