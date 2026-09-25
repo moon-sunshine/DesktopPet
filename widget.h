@@ -5,7 +5,8 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QMenu>
-#include <QMovie>   // 新增：播放动画需要的库
+#include <QMovie>
+#include <QSystemTrayIcon>
 
 class Widget : public QWidget
 {
@@ -19,11 +20,16 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
+    void moveEvent(QMoveEvent *event) override;
 
 private:
     QLabel *petLabel;
-    QMovie *petMovie;   // 新增：动画指针
+    QMovie *petMovie;
     QPoint dragPosition;
+
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayMenu;
+    void initTray();
 };
 
 #endif // WIDGET_H
