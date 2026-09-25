@@ -1,52 +1,61 @@
 #include "widget.h"
 #include <QApplication>
 #include <QPixmap>
+#include <QSize>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
 {
-    // 1. 窗口基本设置（无边框、置顶、透明）
+    // 1. 窗口设置
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
     setAttribute(Qt::WA_TranslucentBackground);
-    resize(300, 300); // 设置窗口初始大小
+    resize(300, 300);
 
-    // 2. 创建显示图片的标签
+    // 2. 创建显示标签
     petLabel = new QLabel(this);
     petLabel->resize(300, 300);
+    petLabel->setAlignment(Qt::AlignCenter);
 
-    // 3. 加载图片
-    // 注意：这里用的是绝对路径，如果你放在其他盘，请修改前面的路径
-    QPixmap pixmap("D:/qt_project/DesktopPet/pet.png");
+    // 3. 尝试加载 GIF
+    petMovie = new QMovie("D:/qt_project/DesktopPet/pet.gif", QByteArray(), this);
 
-    if (pixmap.isNull()) {
-        // 如果图片没找到，用文字提示，防止程序崩溃
-        petLabel->setText("图片没找到\n请把 pet.png 放到 D:/qt_project/DesktopPet/");
-        petLabel->setAlignment(Qt::AlignCenter);
-        petLabel->setStyleSheet("color: red; font-weight: bold; background: transparent;");
+    if (petMovie->isValid()) {
+        // 如果 GIF 加载成功，让它自适应大小播放
+        petMovie->setScaledSize(QSize(300, 300));
+        petLabel->setMovie(petMovie);
+        petMovie->start(); // 开始播放！
     } else {
-        // 让图片自适应窗口大小，保持比例平滑缩放
-        petLabel->setPixmap(pixmap.scaled(300, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        // 如果没找到 GIF，退回到加载静态图或显示提示
+        QPixmap pixmap("D:/qt_project/DesktopPet/pet.png");
+        if (pixmap.isNull()) {
+            petLabel->setText("找不到 pet.gif 或 pet.png");
+            petLabel->setStyleSheet("color: red; font-weight: bold; background: transparent;");
+        } else {
+            petLabel->setPixmap(pixmap.scaled(300, 300, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        }
     }
 
-    // 4. 关键一步：让鼠标事件穿透 Label，传给主窗口，否则拖不动
+    // 关键：让鼠标事件穿透标签，保证拖拽正常
     petLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 }
 
 Widget::~Widget()
 {
+    // 释放动画资源
+    if (petMovie->isValid()) {
+        petMovie->stop();
+    }
 }
 
-// 鼠标按下事件：记录鼠标按下的位置
+// 下面是鼠标拖拽和右键菜单，和昨天完全一样，不需要动
 void Widget::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        // Qt 6 推荐用 globalPosition().toPoint()
         dragPosition = event->globalPosition().toPoint() - frameGeometry().topLeft();
         event->accept();
     }
 }
 
-// 鼠标移动事件：让窗口跟着鼠标跑
 void Widget::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() & Qt::LeftButton) {
@@ -55,11 +64,10 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-// 右键菜单事件：添加退出按钮
 void Widget::contextMenuEvent(QContextMenuEvent *event)
 {
     QMenu menu(this);
     QAction *quitAction = menu.addAction("退出桌宠");
     connect(quitAction, &QAction::triggered, qApp, &QApplication::quit);
-    menu.exec(event->globalPos()); // 在鼠标位置弹出菜单
+    menu.exec(event->globalPos());
 }
